@@ -46,16 +46,19 @@ file.write("skk.shape('turtle')\n")
 #useful lists
 #list of colors
 colors = ['red','black','blue','green']
+#list of shapes:
+shapes = ['turtle','arrow']
 #list of key words
 keywords=['if','for','while','forward','backward','dot','shape','left','right','penup','pen','up','down','go','move','comma','and','or','stamp','value','import','kinter'
-          'speech','turtle','colour']
+          ,'speech','turtle','colour','greater','equal','less','then','indentation','indent','increment','decrement','range','in','per','where','go','dot','declare'
+          ,'program','end']
 #logical operators
 logical_operators=['and','or','xor','not']
 compare_operators=['greater','less','greaterequal','notequal','lessequal']
 #list of Libraries
 libraries=['tkinter','speech_recognition','word2number']
 #list of variables declared
-variables=[]
+variables=['skk','y']
 
 
 #function to return compare_operators
@@ -87,15 +90,16 @@ def operator(str):
 
 #function for getting condition
 def condition(words,i):
-    while(words[i]!='then'):
-        if words[i]+words[i+1] in compare_operators:
+    size=len(words)
+    while(i<size and words[i]!='then'):
+        if (i+1<size and words[i]+words[i+1] in compare_operators):
             T1.insert(END,' {} '.format(operator(words[i]+words[i+1])))
             i+=1
-        elif(words[i] in variables or words[i] in logical_operators):
+        elif(words[i] in variables or words[i] in logical_operators or words[i].isnumeric()):
             T1.insert(END,' {} '.format(words[i]))
         elif(words[i]=='equal'):
             T1.insert(END,' {} '.format('=='))
-        elif(words[i] in comapare_operators):
+        elif(words[i] in compare_operators):
             T1.insert(END,' {} '.format(operator(words[i])))
         i+=1
     return i+1
@@ -126,6 +130,7 @@ def clear():
     global text_prev
     global textcode
     textcode=text_prev
+
 #function for converting the input to code: function for convert button
 def functcon():
       global textcode
@@ -133,18 +138,20 @@ def functcon():
       global indent_string
       global indent
       #splitting into tokens
+      textcode=textcode.lower()
       tot_words=textcode.split()
       size=len(tot_words)
       i=0
       #checking whether the token is a keyword or lower case words
       words=[]
       while i<size:
-          if(tot_words[i] in keywords or tot_words[i].isnumeric() or tot_words[i] in colors ):
+          if(tot_words[i] in keywords or tot_words[i].isnumeric() or tot_words[i] in colors or tot_words[i] in variables):
               words.append(tot_words[i].lower())
           elif(i>0 and (tot_words[i-1]=='for' or tot_words[i-1]=='variable')):
               words.append(tot_words[i].lower())
           i+=1
       print(words)
+      print(variables)
       size=len(words)
       i=0
       #loop over all the tokens to convert into code statemnts
@@ -159,7 +166,7 @@ def functcon():
                   number1=100
               skk.forward(number1)
               file.write("skk.forward({})\n".format(number1)+indent_string)
-              T1.insert(END,"skk.forward({})\n".format(number1))
+              T1.insert(END,"skk.forward({})\n".format(number1)+indent_string)
           elif(words[i]=='backward'):
               i+=1
               if(i<size and words[i].isnumeric()):
@@ -168,8 +175,8 @@ def functcon():
               else:
                   number1=100
               skk.backward(number1)
-              file.write("skk.backward({})\n".format(number1))
-              T1.insert(END,"skk.backward({})\n".format(number1))
+              file.write("skk.backward({})\n".format(number1)+indent_string)
+              T1.insert(END,"skk.backward({})\n".format(number1)+indent_string)
           elif(words[i]=='left' or words[i]=='lift'):
               i+=1
               if(i<size and words[i].isnumeric()):
@@ -178,8 +185,8 @@ def functcon():
               else:
                   number1=90
               skk.left(number1)
-              file.write("skk.left({})\n".format(number1))
-              T1.insert(END,"skk.left({})\n".format(number1))
+              file.write("skk.left({})\n".format(number1)+indent_string)
+              T1.insert(END,"skk.left({})\n".format(number1)+indent_string)
           elif(words[i]=='right' or words[i]=='write'):
               i+=1
               if(i<size and words[i].isnumeric()):
@@ -188,31 +195,33 @@ def functcon():
               else:
                   number1=90
               skk.right(number1)
-              file.write("skk.right({})\n".format(number1))
-              T1.insert(END,"skk.right({})\n".format(number1))
+              file.write("skk.right({})\n".format(number1)+indent_string)
+              T1.insert(END,"skk.right({})\n".format(number1)+indent_string)
           elif(words[i]=='pen'):
               i+=1
               if(i<size and words[i]=='up'):
                   skk.penup()
-                  file.write("skk.penup()\n")
-                  T1.insert(END,"skk.penup()\n")
+                  file.write("skk.penup()\n"+indent_string)
+                  T1.insert(END,"skk.penup()\n"+indent_string)
               elif(i<size and words[i]=='down'):
                   skk.pendown()
-                  file.write("skk.pendown()\n")
-                  T1.insert(END,"skk.pendown()\n")
+                  file.write("skk.pendown()\n"+indent_string)
+                  T1.insert(END,"skk.pendown()\n"+indent_string)
           elif(words[i]=='colour' or words[i]=='color'):
               i+=1
               if(i<size and words[i] not in colors):
                   skk.color("black")
-                  file.write('skk.color("black")\n')
-                  T1.insert(END,'skk.color("black")\n')
+                  file.write('skk.color("black")\n'+indent_string)
+                  T1.insert(END,'skk.color("black")\n'+indent_string)
                   i+=1
               else:
                   skk.color(words[i])
-                  file.write('skk.color("{}")\n'.format(words[i]))
-                  T1.insert(END,'skk.color("{}")\n'.format(words[i]))
-          elif(words[i]=='move'):
+                  file.write('skk.color("{}")\n'.format(words[i])+indent_string)
+                  T1.insert(END,'skk.color("{}")\n'.format(words[i])+indent_string)
+          elif(words[i]=='move' or words[i]=='go'):
               i+=1
+              number1=0
+              number2=0
               if(words[i].isnumeric()):
                    number1=int(words[i])
                    i+=1
@@ -222,33 +231,41 @@ def functcon():
                    number2=int(words[i])
                    i+=1
               skk.goto(number1,number2)
+              T1.insert(END,'skk.goto('+number1+','+number2+')\n'+indent_string)
           elif(words[i]=='dot'):
               if(i>0 and words[i-1] in colors):
                   cur_cul=words[i-1]
+                  i+=1
                   if(i<size and words[i].isnumeric()):
                       number1=int(words[i])
                   else:
                       number1=60
                   i+=1
+              else:
+                  i+=1
+                  cur_cul="black"
+                  number1=60
               skk.dot(number1,cur_cul)
-              file.write('skk.dot()\n')
-              T1.insert(END,'skk.dot()\n')
+              file.write('skk.dot()\n'+indent_string)
+              T1.insert(END,'skk.dot({},{})\n'.format(number1,cur_cul)+indent_string)
           elif(words[i]=='stamp'):
-                file.write('skk.stamp()\n')
-                T1.insert(END,'skk.stamp()\n')
+                file.write('skk.stamp()\n'+indent_string)
+                T1.insert(END,'skk.stamp()\n'+indent_string)
+                i+=1
           elif(words[i]=='shape' or words[i]=='make' or words[i]=='change'):
               i+=1
-              while(words[i]=='to' or words[i]=='it'):
-                  i+=1;
-              skk.shape(words[i])
-              file.write('skk.shape("{}")\n'.format(words[i]))
-              T1.insert(END,'skk.shape("{}")\n'.format(words[i]))
+              shape=words[i]
+              if(words[i] not in shapes):
+                  shape='arrow'
+              skk.shape(shape)
+              file.write('skk.shape("{}")\n'.format(words[i])+indent_string)
+              T1.insert(END,'skk.shape("{}")\n'.format(shape)+indent_string)
           elif(words[i]=='import'):
               i+=1
               if(words[i]=='kinter'):
-                  T1.insert(END,'import tkinter\n')
+                  T1.insert(END,'import tkinter\n'+indent_string)
               elif(words[i]=='speech'):
-                  T1.insert(END,'import speech_recognition\n')
+                  T1.insert(END,'import speech_recognition\n'+indent_string)
               elif(words[i]=='speech'):
                   T1.insert(END,'import turtle\n')
           #if condition
@@ -256,22 +273,24 @@ def functcon():
               T1.insert(END,'if(')
               i+=1
               i=condition(words,i)
-              T1.insert(END,'):\n')
               indent+=3
               indent_string=' '*indent
+              T1.insert(END,'):\n'+indent_string)
+
           #while condition
           elif(words[i]=='while'):
               T1.insert(END,'while(')
               i+=1
               i=condition(words,i)
-              T1.insert(END,'):\n')
               indent+=3
               indent_string=' '*indent
-          elif(words[i]=='for'):
+              T1.insert(END,'):\n'+indent_string)
+
+          elif(words[i]=='for' or words[i] =='per' or words[i]=='where'):
               T1.insert(END,'for ')
               i+=1
-              while(words[i] in variables or words[i]=='in'):
-                  T1.insert('{}'.format(words[i]))
+              while(words[i] not in keywords or words[i]=='in'):
+                  T1.insert(END,' {} '.format(words[i]))
                   i+=1
               if(words[i]=='range'):
                   T1.insert(END,' range(')
@@ -279,19 +298,48 @@ def functcon():
                   while(words[i].isnumeric() or words[i]=='comma'):
                       T1.insert(END,'{}'.format(words[i]))
                       i+=1
+                  T1.insert(END,')')
+              indent+=3
+              indent_string=' '*indent
+
+              T1.insert(END,':\n'+indent_string)
 
           elif(words[i]=='declare'):
               i+=1
               if(i<size-2 and words[i+1]=='equal' and words[i+2].isnumeric()):
-                 T0.insert(END,''+words[i]+' = '+words[i+2])
+                 T1.insert(END,words[i].lower()+' = '+words[i+2]+'\n'+indent_string)
+                 variables.append(words[i].lower())
+                 i+=3
+          elif(words[i]=='increment'):
+              i+=1
+              if(i<size and words[i] in variables):
+                  T1.insert(END,'{}+=1\n'.format(words[i])+indent_string)
+                  i+=1
+              else:
+                  i+=1
+          elif(words[i]=='decrement'):
+              i+=1
+              if(i<size and words[i] in variables):
+                  T1.insert(END,'{}-=1\n'.format(words[i])+indent_string)
+                  i+=1
+              else:
+                  i+=1
+          elif(words[i] in variables):
+              T1.insert(END,'{} '.format(words[i]))
+              i+=1
+              while(i<size-1 and operator(words[i])!=' '):
+                  T1.insert(END,'{} {}'.format(operator(words[i]),words[i+1]))
+                  i+=2
+              T1.insert(END,'\n'+indent_string)
           elif(words[i]=='end' or words[i]=='and'):
               i+=1
-              if(i<size and words[i]=='indent'):
+              if(i<size and (words[i]=='indent' or words[i]=='indentation') ):
                   if(indent>=3):
                       indent-=3
                       indent_string=' '*indent
+                      T1.insert(END,'\n'+indent_string)
 
-              else:
+              elif(i<size and words[i]=='program'):
                   break
           else:
               i+=1
